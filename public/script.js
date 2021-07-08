@@ -4,9 +4,116 @@ const all_messages = document.getElementById("all_messages");
 const main__chat__window = document.getElementById("main__chat__window");
 const videoGrid = document.getElementById("video-grid");
 const myVideo = document.createElement("video");
-myVideo.muted = true;
+let status = document.getElementById("info");
+//New Work
+const shareUrlImg = "public\Images\illustration-section-01.svg";
+const leaveRoomIng = "public\Images\illustration-section-01.svg";
+const confirmImg = "public\Images\illustration-section-01.svg";
+const peerLoockupUrl ="https://extreme-ip-lookup.com/json/";
+const avtarApiUrl = "https://eu.ui-avatars.com/api";
 
-var peer = new Peer(undefined, {
+let swalBackground = "rgba(0,0,0,0.7)";
+let myPeerName;
+let myName;
+let roomUrl = "/";
+let myVideoAvtarImag;
+let myVideoParagraph;
+
+let whoAreYou = ()=>{
+  Swal.fire({
+    allowOutsideClick: false,
+    background: swalBackground,
+    position: "center",
+    title: "Enter your name",
+    input: "text",
+    confirmButtonText: `Join meeting`,
+    showClass: {
+      popup: "animate__animated animate__fadeInDown",
+    },
+    hideClass: {
+      popup: "animate__animated animate__fadeOutUp",
+    },
+     inputValidator:(value)=>{
+       if(!value){
+         return "Please enter your name";
+       }
+       myName = value;
+       myPeerName = value;
+       let userInfo = document.createElement("h4");
+       userInfo.innerHTML = myName+" (me) ";
+       status.append(userInfo);
+       //myVideoParagraph.innerHTML = myPeerName+" (me) ";
+       //setPeerAvatarImgName("myVideoAvatarImage", myPeerName);
+     },
+  }).then(()=>{
+    welcomeUser();
+  })
+}
+
+let welcomeUser = ()=>{
+  const myRoomUrl = window.location.href;
+  Swal.fire({
+    position: "center",
+    title: "<strong>Welcome " + myPeerName + "</strong>",
+    html:
+      `
+      <br/> 
+      <p style="color:white;">Share this meeting invite others to join.</p>
+      <p style="color:rgb(8, 189, 89);">` +
+      myRoomUrl +
+      `</p>`,
+    showDenyButton: false,
+    showCancelButton: true,
+    confirmButtonText: `Copy meeting URL`,
+    cancelButtonText: `Close`,
+    showClass: {
+      popup: "animate__animated animate__fadeInDown",
+    },
+    hideClass: {
+      popup: "animate__animated animate__fadeOutUp",
+    },
+  }).then((result) => {
+    if (result.isConfirmed) {
+      copyRoomURL();
+    } 
+  });
+}
+function copyRoomURL() {
+  // save Room Url to clipboard
+  let roomURL = window.location.href;
+  let tmpInput = document.createElement("input");
+  document.body.appendChild(tmpInput);
+  tmpInput.value = roomURL;
+  tmpInput.select();
+  tmpInput.setSelectionRange(0, 99999);
+  document.execCommand("copy");
+  console.log("Copied to clipboard Join Link ", roomURL);
+  document.body.removeChild(tmpInput);
+  userLog("toast", "Meeting URL is copied to clipboard");
+}
+function userLog(type, message) {
+  switch (type) {
+    case "toast":
+      const Toast = Swal.mixin({
+        background: swalBackground,
+        toast: true,
+        position: "top-end",
+        showConfirmButton: false,
+        timer: 3000,
+      });
+      Toast.fire({
+        icon: "info",
+        title: message,
+      });
+      break;
+    default:
+      alert(message);
+  }
+}
+
+//New Work end
+myVideo.muted = true;
+let peer = new Peer(undefined, {
   path: "/peerjs",
   host: "/",
   port: "3030",
@@ -29,18 +136,27 @@ navigator.mediaDevices
     addVideoStream(myVideo, stream);
     //Answering call of Peer
     peer.on("call", (call) => {
+      //window.confirm("Hello");
       call.answer(stream);
       const video = document.createElement("video");
-
       call.on("stream", (userVideoStream) => {
         addVideoStream(video, userVideoStream);
       });
     });
 
     socket.on("user-connected", (userId) => {
+      //console.log(alert("A user is trying to connect, do you want him to enter?"));
+      //let permission = confirm(`A ${userId} is trying to connect in the meeting.`);
+      // if(permission){
+      //   connectToNewUser(userId, stream);
+      // }
+      // else{
+      //   console.log("user not allowed");
+      // }
+      //AdmitOrNot();
       connectToNewUser(userId, stream);
+      
     });
-
     socket.on("user-disconnected",(userId)=>{
       if(peers[userId]) peers[userId].close();
     });
@@ -49,12 +165,14 @@ navigator.mediaDevices
 
 peer.on("call", function (call) {
   getUserMedia(
-    { video: true, audio: true },
-    function (stream) {
+    { video: true, 
+      audio: true },
+     (stream) => {
       peerStream.set(socket.id,stream);
       call.answer(stream); // Answer the call with an A/V stream.
       const video = document.createElement("video");
-      call.on("stream", function (remoteStream) {
+      //const info = document.createElement("h4");
+      call.on("stream", (remoteStream) => {
         addVideoStream(video, remoteStream);
       });
       
@@ -63,10 +181,13 @@ peer.on("call", function (call) {
 });
 
 peer.on("open", (id) => {
+  whoAreYou();
   socket.emit("join-room", ROOM_ID, id);
+  roomUrl = window.location.href;
 });
 
 const connectToNewUser = (userId, streams) => {
+  
   var call = peer.call(userId, streams);
   console.log(call);
   var video = document.createElement("video");
@@ -81,11 +202,11 @@ const connectToNewUser = (userId, streams) => {
 };
 
 const addVideoStream = (videoEl, stream) => {
+  
   videoEl.srcObject = stream;
   videoEl.addEventListener("loadedmetadata", () => {
     videoEl.play();
   });
-
   videoGrid.append(videoEl);
   let totalUsers = document.getElementsByTagName("video").length;
   if (totalUsers > 1) {
@@ -94,6 +215,7 @@ const addVideoStream = (videoEl, stream) => {
         100 / totalUsers + "%";
     }
   }
+  
 };
 
 const playStop = () => {
@@ -172,4 +294,12 @@ const setMuteButton = () => {
 
 const leaveMeeting = () =>{
   window.location.assign("/rejoin");
+}
+
+const rejoining = () =>{
+  window.location.assign(roomUrl);
+}
+
+const share = ()=>{
+  copyRoomURL();
 }
