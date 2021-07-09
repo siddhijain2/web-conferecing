@@ -1,7 +1,6 @@
+console.log("Connecting to signaling server");
 const socket = io("/");
-const chatInputBox = document.getElementById("chat_message");
-const all_messages = document.getElementById("all_messages");
-const main__chat__window = document.getElementById("main__chat__window");
+
 const videoGrid = document.getElementById("video-grid");
 const myVideo = document.createElement("video");
 let status = document.getElementById("info");
@@ -18,6 +17,9 @@ let myName;
 let roomUrl = "/";
 let myVideoAvtarImag;
 let myVideoParagraph;
+let localMediaStream;
+
+
 
 let whoAreYou = ()=>{
   Swal.fire({
@@ -78,7 +80,7 @@ let welcomeUser = ()=>{
     } 
   });
 }
-function copyRoomURL() {
+let copyRoomURL = () =>{
   // save Room Url to clipboard
   let roomURL = window.location.href;
   let tmpInput = document.createElement("input");
@@ -91,7 +93,7 @@ function copyRoomURL() {
   document.body.removeChild(tmpInput);
   userLog("toast", "Meeting URL is copied to clipboard");
 }
-function userLog(type, message) {
+let userLog = (type, message)=> {
   switch (type) {
     case "toast":
       const Toast = Swal.mixin({
@@ -114,9 +116,9 @@ function userLog(type, message) {
 //New Work end
 myVideo.muted = true;
 let peer = new Peer(undefined, {
-  path: "/peerjs",
-  host: "/",
+  host: "peerpacific-headland-94977.herokuapp.com",
   port: "3030",
+
 });
 let peers = {};
 let myVideoStream; 
@@ -134,29 +136,13 @@ navigator.mediaDevices
   .then((stream) => {
     myVideoStream = stream;
     addVideoStream(myVideo, stream);
-    //Answering call of Peer
-    peer.on("call", (call) => {
-      //window.confirm("Hello");
-      call.answer(stream);
-      const video = document.createElement("video");
-      call.on("stream", (userVideoStream) => {
-        addVideoStream(video, userVideoStream);
-      });
-    });
 
     socket.on("user-connected", (userId) => {
-      //console.log(alert("A user is trying to connect, do you want him to enter?"));
-      //let permission = confirm(`A ${userId} is trying to connect in the meeting.`);
-      // if(permission){
-      //   connectToNewUser(userId, stream);
-      // }
-      // else{
-      //   console.log("user not allowed");
-      // }
-      //AdmitOrNot();
+      console.log(userId);
       connectToNewUser(userId, stream);
-      
+  
     });
+
     socket.on("user-disconnected",(userId)=>{
       if(peers[userId]) peers[userId].close();
     });
@@ -164,6 +150,7 @@ navigator.mediaDevices
   });
 
 peer.on("call", function (call) {
+  whoAreYou();
   getUserMedia(
     { video: true, 
       audio: true },
@@ -187,12 +174,11 @@ peer.on("open", (id) => {
 });
 
 const connectToNewUser = (userId, streams) => {
-  
   var call = peer.call(userId, streams);
-  console.log(call);
+  //console.log(call);
   var video = document.createElement("video");
   call.on("stream", (userVideoStream) => {
-    console.log(userVideoStream);
+    //console.log(userVideoStream);
     addVideoStream(video, userVideoStream);
   });
   call.on('close',()=>{
@@ -202,7 +188,7 @@ const connectToNewUser = (userId, streams) => {
 };
 
 const addVideoStream = (videoEl, stream) => {
-  
+  videoEl.mirror =  true;
   videoEl.srcObject = stream;
   videoEl.addEventListener("loadedmetadata", () => {
     videoEl.play();
