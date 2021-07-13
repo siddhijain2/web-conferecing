@@ -10,6 +10,17 @@ const leaveRoomIng = "public\Images\illustration-section-01.svg";
 const confirmImg = "public\Images\illustration-section-01.svg";
 const peerLoockupUrl ="https://extreme-ip-lookup.com/json/";
 const avtarApiUrl = "https://eu.ui-avatars.com/api";
+const showChat = document.querySelector("#showChat");
+myVideo.muted = true;
+
+showChat.addEventListener("click", () => {
+  document.querySelector(".main__right").style.display = "flex";
+  document.querySelector(".main__right").style.flex = "1";
+  document.querySelector(".main__left").style.display = "none";
+  document.querySelector(".header__back").style.display = "block";
+});
+
+const user = prompt("Enter your name");
 
 let swalBackground = "rgba(0,0,0,0.7)";
 let myPeerName;
@@ -41,10 +52,10 @@ let whoAreYou = ()=>{
        }
        myName = value;
        myPeerName = value;
-       let userInfo = document.createElement("h4");
-       userInfo.innerHTML = myName+" (me) ";
-       status.append(userInfo);
-       //myVideoParagraph.innerHTML = myPeerName+" (me) ";
+       //let userInfo = document.createElement("h4");
+      // userInfo.innerHTML = myName+" (me) ";
+       //status.append(userInfo);
+       //VideoParagraph.innerHTML = myPeerName+" (me) ";
        //setPeerAvatarImgName("myVideoAvatarImage", myPeerName);
      },
   }).then(()=>{
@@ -56,7 +67,7 @@ let welcomeUser = ()=>{
   const myRoomUrl = window.location.href;
   Swal.fire({
     position: "center",
-    title: "<strong>Welcome " + myPeerName + "</strong>",
+    title: "<strong>Welcome " + user + "</strong>",
     html:
       `
       <br/> 
@@ -116,7 +127,8 @@ let userLog = (type, message)=> {
 //New Work end
 myVideo.muted = true;
 let peer = new Peer(undefined, {
-  host: "peerpacific-headland-94977.herokuapp.com",
+  path: "/peerjs",
+  host: "/",
   port: "3030",
 
 });
@@ -139,7 +151,13 @@ navigator.mediaDevices
 
     socket.on("user-connected", (userId) => {
       console.log(userId);
-      connectToNewUser(userId, stream);
+      if(confirm("A user wabt to connect")){
+        connectToNewUser(userId, stream);
+      }
+      else{
+        socket.emit("rejected");
+      }
+     
   
     });
 
@@ -150,7 +168,7 @@ navigator.mediaDevices
   });
 
 peer.on("call", function (call) {
-  whoAreYou();
+ 
   getUserMedia(
     { video: true, 
       audio: true },
@@ -168,12 +186,12 @@ peer.on("call", function (call) {
 });
 
 peer.on("open", (id) => {
-  whoAreYou();
-  socket.emit("join-room", ROOM_ID, id);
+  welcomeUser();
+  socket.emit("join-room", ROOM_ID, id, user);
   roomUrl = window.location.href;
 });
 
-const connectToNewUser = (userId, streams) => {
+const connectToNewUser = (userId, streams, userName) => {
   var call = peer.call(userId, streams);
   //console.log(call);
   var video = document.createElement("video");
@@ -188,21 +206,79 @@ const connectToNewUser = (userId, streams) => {
 };
 
 const addVideoStream = (videoEl, stream) => {
-  videoEl.mirror =  true;
-  videoEl.srcObject = stream;
-  videoEl.addEventListener("loadedmetadata", () => {
-    videoEl.play();
-  });
-  videoGrid.append(videoEl);
-  let totalUsers = document.getElementsByTagName("video").length;
-  if (totalUsers > 1) {
-    for (let index = 0; index < totalUsers; index++) {
-      document.getElementsByTagName("video")[index].style.width =
-        100 / totalUsers + "%";
+    console.log("Hello ",videoEl,stream);
+    let peer_id = socket.id;
+    let localVideo = videoEl;
+
+    // const videoWrap = document.createElement("div");
+    // const myStatusMenu = document.createElement("div");
+    // const myVideoParagraph = document.createElement("h4");
+
+    // //menu status
+
+    // myStatusMenu.setAttribute("id", peer_id+"myStatusMenu");
+    // myStatusMenu.className = "statusMenu";
+
+    // //my peer name
+    // myVideoParagraph.setAttribute("id", "VideoParagraph");
+    // myVideoParagraph.className = "videoPeerName";
+    // //myVideoParagraph.innerHTML = user;
+    // //adding elements to myStatusMenu div
+    // myStatusMenu.appendChild(myVideoParagraph);
+
+    // //add elements to video wrap div
+    // videoWrap.appendChild(myStatusMenu);
+    // videoWrap.className = "width-video";
+    // videoWrap.setAttribute("id", "myVideoWrap");
+    // videoWrap.appendChild(localVideo);
+    // localVideo.setAttribute("id", "myVideo");
+    localVideo.setAttribute("playsinline", true);
+    localVideo.className = "mirror";
+    localVideo.autoplay = true;
+    localVideo.muted = true;
+    localVideo.volume = 0;
+    localVideo.controls = false;
+    videoGrid.append(localVideo);
+    localVideo.srcObject = stream;
+    //getHtmlElementsById();
+    //VideoParagraph = document.getElementById("myVideoParagraph");
+    //VideoParagraph.innerHTML = user;
+    totalUsers = document.getElementsByTagName("video").length;
+    if (totalUsers > 1) {
+        for (let index = 0; index < totalUsers; index++) {
+            document.getElementsByTagName("video")[index].style.width =
+            100 / totalUsers + "%";
+        }
     }
-  }
-  
 };
+let text = document.querySelector("#chat_message");
+let send = document.getElementById("send");
+let messages = document.querySelector(".messages");
+
+send.addEventListener("click", (e) => {
+  if (text.value.length !== 0) {
+    socket.emit("message", text.value);
+    text.value = "";
+  }
+});
+
+text.addEventListener("keydown", (e) => {
+  if (e.key === "Enter" && text.value.length !== 0) {
+    socket.emit("message", text.value);
+    text.value = "";
+  }
+});
+
+socket.on("createMessage", (message, userName) => {
+  messages.innerHTML =
+    messages.innerHTML +
+    `<div class="message">
+        <b><i class="far fa-user-circle"></i> <span> ${
+          userName === user ? "me" : userName
+        }</span> </b>
+        <span>${message}</span>
+    </div>`;
+});
 
 const playStop = () => {
   console.log(peerStream.get(socket.id));
@@ -282,9 +358,6 @@ const leaveMeeting = () =>{
   window.location.assign("/rejoin");
 }
 
-const rejoining = () =>{
-  window.location.assign(roomUrl);
-}
 
 const share = ()=>{
   copyRoomURL();

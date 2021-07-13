@@ -18,19 +18,22 @@ body {
   flex-wrap: wrap;
   overflow-y: auto;
 }
-video {
+.width-video, video {
   display: block;
   flex: 1;
   object-fit: cover;
-  border: 5px solid #000;
+  width: 100%;
+  border: 5px solid rgb(36, 36, 36);
   max-width: 600px;
+  transform: rotateY(180deg);
+
 }
 .main {
   height: 100%;
   display: flex;
 }
 .main_left {
-  flex: 1;
+  flex: 0.8;
   display: flex;
   flex-direction: column;
 }
@@ -96,19 +99,16 @@ video {
 
 .statusMenu {
   z-index: 7;
-  display: inline-block;
-  position: absolute;
+  display: block;
+  /*position: absolute;*/
   padding: 10px;
-  background-color: rgba(0, 0, 0, 0.7);
-  border-radius: 5px;
+  background-color:#3d3d42;
   font-size: small;
-
   font-weight: bold;
   text-align: center;
   width: 100%;
   cursor: default;
   /* center */
-  top: 22px;
 }
 .statusMenu i,
 .statusMenu p,
@@ -200,4 +200,93 @@ video {
   background-color: black !important;
   color: white !important;
   border-radius: 6px !important;
+}
+.main__right {
+  display: flex;
+  flex-direction: column;
+  flex: 0.2;
+  background-color: #292d30;
+}
+
+.main__chat_window {
+  flex-grow: 1;
+  overflow-y: scroll;
+  overflow-x: scroll;
+}
+
+.main__chat_window::-webkit-scrollbar {
+  display: none;
+}
+
+.main__message_container {
+  padding: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  color: rgb(255, 255, 255);
+}
+
+
+
+.main__message_container > input {
+  height: 50px;
+  flex: 1;
+  font-size: 1rem;
+  border-radius: 5px;
+  padding-left: 20px;
+  margin-right: 15px;
+  border: none;
+}
+
+.messages {
+  display: flex;
+  flex-direction: column;
+  margin: 1.5rem;
+}
+
+.message {
+  display: flex;
+  flex-direction: column;
+}
+
+.message > b {
+  color: #eeeeee;
+  display: flex;
+  align-items: center;
+  text-transform: capitalize;
+}
+
+.message > b > i {
+  margin-right: 0.7rem;
+  font-size: 1rem;
+}
+
+.message > span {
+  background-color: #eeeeee;
+  margin: 1rem 0;
+  padding: 1rem;
+  border-radius: 35px;
+}
+#showChat {
+  display: none;
+}
+
+@media (max-width: 700px) {
+  .main__right {
+    display: none;
+  }
+  .main__left {
+    width: 100%;
+    flex: 1;
+  }
+
+  video {
+    height: auto;
+    width: 100%;
+  }
+
+  #showChat {
+    display: flex;
+  }
 }

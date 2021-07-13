@@ -2,19 +2,12 @@
 
 require("dotenv").config();
 
-const compression = require("compression");
 const express = require("express");
 const app = express();
-app.use((compression()));
 const server = require("http").Server(app);
 const { v4: uuidv4 } = require("uuid");
 const io = require("socket.io")(server);
-const ngrok = require("ngrok");
-
-let channels = {}; //collect channels
-let sockets = {}; //collect sockets
-let peers = {}; //collect peers info grp by channels
-let meetingURL;
+app.set("view engine", "ejs");
 
 // Peer
 const { ExpressPeerServer } = require("peer");
@@ -22,16 +15,21 @@ const peerServer = ExpressPeerServer(server, {
   debug: true,
 });
 
-app.set("view engine", "ejs");
-app.use(express.static("public"));
+
 app.use("/peerjs", peerServer);
+app.use(express.static("public"));
+
 
 app.get("/rejoin", (req,res) =>{
   res.render("endScreen");
 });
 
+app.get("/home",(req,res)=>{
+  res.render("home");
+})
+
 app.get("/", (req, rsp) => {
-  meetingURL = `${uuidv4()}`;
+  let meetingURL = `${uuidv4()}`;
   rsp.redirect(`/${meetingURL}`);
 });
 
@@ -43,15 +41,17 @@ io.on("connection", (socket) => {
   //console.log(socket);
   
   console.log("["+socket.id+"]---> connection accepted");
-  socket.on("join-room", (roomId, userId) => {
+  socket.on("join-room", (roomId, userId,userName) => {
     socket.join(roomId);
-    socket.to(roomId).broadcast.emit("user-connected", userId);
+    socket.to(roomId).broadcast.emit("user-connected", userId, userName);
 
     socket.on("disconnect", () => {
       socket.to(roomId).broadcast.emit("user-disconnected", userId);
       //console.log("disconnect message broadcasted");
     });
-    
+    socket.on("message", (message) => {
+      io.to(roomId).emit("createMessage", message, userName);
+    });
   });
 });
 
