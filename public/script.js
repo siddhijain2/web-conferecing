@@ -147,15 +147,7 @@ navigator.mediaDevices
     addVideoStream(myVideo, stream);
 
     socket.on("user-connected", (userId) => {
-      console.log(userId);
-      if(confirm("A user wabt to connect")){
         connectToNewUser(userId, stream);
-      }
-      else{
-        socket.emit("rejected");
-      }
-     
-  
     });
 
     socket.on("user-disconnected",(userId)=>{
