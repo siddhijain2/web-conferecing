@@ -94,14 +94,14 @@ let welcomeUser = ()=>{
 let copyRoomURL = () =>{
   // save Room Url to clipboard
   let roomURL = window.location.href;
-  let tmpInput = document.createElement("input");
+  let tempInput = document.createElement("input");
   document.body.appendChild(tmpInput);
-  tmpInput.value = roomURL;
-  tmpInput.select();
-  tmpInput.setSelectionRange(0, 99999);
+  tempInput.value = roomURL;
+  tempInput.select();
+  tempInput.setSelectionRange(0, 99999);
   document.execCommand("copy");
   console.log("Copied to clipboard Join Link ", roomURL);
-  document.body.removeChild(tmpInput);
+  document.body.removeChild(tempInput);
   userLog("toast", "Meeting URL is copied to clipboard");
 }
 let userLog = (type, message)=> {
@@ -197,38 +197,12 @@ const connectToNewUser = (userId, streams, userName) => {
 const addVideoStream = (videoEl, stream) => {
     console.log("Hello ",videoEl,stream);
     let peer_id = socket.id;
-    let localVideo = videoEl;
-
-    // const videoWrap = document.createElement("div");
-    // const myStatusMenu = document.createElement("div");
-    // const myVideoParagraph = document.createElement("h4");
-
-    // //menu status
-
-    // myStatusMenu.setAttribute("id", peer_id+"myStatusMenu");
-    // myStatusMenu.className = "statusMenu";
-
-    // //my peer name
-    // myVideoParagraph.setAttribute("id", "VideoParagraph");
-    // myVideoParagraph.className = "videoPeerName";
-    // //myVideoParagraph.innerHTML = user;
-    // //adding elements to myStatusMenu div
-    // myStatusMenu.appendChild(myVideoParagraph);
-
-    // //add elements to video wrap div
-    // videoWrap.appendChild(myStatusMenu);
-    // videoWrap.className = "width-video";
-    // videoWrap.setAttribute("id", "myVideoWrap");
-    // videoWrap.appendChild(localVideo);
-    // localVideo.setAttribute("id", "myVideo");
-    localVideo.setAttribute("playsinline", true);
-    localVideo.className = "mirror";
-    localVideo.autoplay = true;
-    localVideo.muted = true;
-    localVideo.volume = 0;
-    localVideo.controls = false;
-    videoGrid.append(localVideo);
-    localVideo.srcObject = stream;
+    let Video = videoEl;
+    Video.setAttribute("playsinline", true);
+    Video.autoplay = true;
+    Video.controls = false;
+    videoGrid.append(Video);
+    Video.srcObject = stream;
     //getHtmlElementsById();
     //VideoParagraph = document.getElementById("myVideoParagraph");
     //VideoParagraph.innerHTML = user;
