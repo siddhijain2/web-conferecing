@@ -113,7 +113,7 @@ let copyRoomURL = () =>{
   document.body.removeChild(tempInput);
   userLog("toast", "Meeting URL is copied to clipboard");
 }
-let shareRoomByEmail(message){
+let shareRoomByEmail = (message)=> {
   let email = message.email;
   let subject = message.subject;
   let emailBody = message.body;
