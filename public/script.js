@@ -95,7 +95,7 @@ let copyRoomURL = () =>{
   // save Room Url to clipboard
   let roomURL = window.location.href;
   let tempInput = document.createElement("input");
-  document.body.appendChild(tmpInput);
+  document.body.appendChild(tempInput);
   tempInput.value = roomURL;
   tempInput.select();
   tempInput.setSelectionRange(0, 99999);
