@@ -127,10 +127,7 @@ let userLog = (type, message)=> {
 //New Work end
 myVideo.muted = true;
 let peer = new Peer(undefined, {
-  path: "/peerjs",
-  host: "/",
-  port: "3030",
-
+  host: "peerpacific-headland-94977.herokuapp.com",
 });
 let peers = {};
 let myVideoStream; 
