@@ -75,9 +75,10 @@ let welcomeUser = ()=>{
       <p style="color:rgb(8, 189, 89);">` +
       myRoomUrl +
       `</p>`,
-    showDenyButton: false,
+    showDenyButton: true,
     showCancelButton: true,
     confirmButtonText: `Copy meeting URL`,
+    denyButtonText: `Email Invite`
     cancelButtonText: `Close`,
     showClass: {
       popup: "animate__animated animate__fadeInDown",
@@ -89,6 +90,14 @@ let welcomeUser = ()=>{
     if (result.isConfirmed) {
       copyRoomURL();
     } 
+    else if(result.isDenied){
+        let message = {
+          email:"",
+          subject: "Invite to join video chat meeting",
+          body:"Click to join: "+ myRoomUrl,
+        };
+      shareRoomByEmail(message);
+    }
   });
 }
 let copyRoomURL = () =>{
@@ -103,6 +112,13 @@ let copyRoomURL = () =>{
   console.log("Copied to clipboard Join Link ", roomURL);
   document.body.removeChild(tempInput);
   userLog("toast", "Meeting URL is copied to clipboard");
+}
+let shareRoomByEmail(message){
+  let email = message.email;
+  let subject = message.subject;
+  let emailBody = message.body;
+  document.location =
+    "mailto:" + email + "?subject=" + subject + "&body=" + emailBody;
 }
 let userLog = (type, message)=> {
   switch (type) {
