@@ -78,7 +78,7 @@ let welcomeUser = ()=>{
     showDenyButton: true,
     showCancelButton: true,
     confirmButtonText: `Copy meeting URL`,
-    denyButtonText: `Email Invite`
+    denyButtonText: `Email Invite`,
     cancelButtonText: `Close`,
     showClass: {
       popup: "animate__animated animate__fadeInDown",
